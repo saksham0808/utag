@@ -79,6 +79,43 @@ do
 	song=$_CAPWORDS
 	
 	printf 'Song\t:\t%s\n' "$song"
+
+	# To find featuring artists now
+	song=$(echo $song 		| sed 's/(official.*)//gI')
+	song=$(echo $song 		| sed 's/\[official.*\]//gI')
+
+	# Converting to mp3
+	target=$song".mp3"
+	filetype=$(echo "$file" | grep -E ".mp4$") 
+	if [ "$filetype" != "" ]
+	then
+		ffmpeg -i "$file" "$song"".mp3"
+	fi
+	file=$target
+
+	# Adding artist information.
+	presentartist=$(id3v2 -v "$file")
+
+	if [ "$presentartist" == "" ]
+	then
+		echo "No present artist. Should we add the above mentioned?"
+		read yorno
+		if [ $yorno == "y" ]
+		then
+			id3v2 -a "$artist" -t "$song" "$file"
+		fi	
+	elif [ "$presentartist" != "$artist" ]
+	then
+		echo "Conflicting artist information. Choose 1 or 2:"
+		echo "1. " $presentartist
+		echo "2. " $artist
+		read choice	
+		if [ $choice == "2" ]
+		then
+			id3v2 -a "$artist $song $file"
+		fi
+	fi
+
 done
 
 printf '******************************\n'
