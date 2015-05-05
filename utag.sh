@@ -40,8 +40,8 @@ _capwords()
 
 for file in "$@"
 do
-	ismp4f=$(echo $file | grep -E ".mp4$" -o)
-	if [ "$ismp4f" == "" ]
+	ismpf=$(echo $file | grep -E "\.mp.$" -o)
+	if [ "$ismpf" == "" ]
 	then
 		continue
 	fi
@@ -79,7 +79,7 @@ do
 	song=$_CAPWORDS
 	
 	printf 'Song\t:\t%s\n' "$song"
-
+	
 	# To find featuring artists now
 	song=$(echo $song 		| sed 's/(official.*)//gI')
 	song=$(echo $song 		| sed 's/\[official.*\]//gI')
@@ -89,17 +89,19 @@ do
 	filetype=$(echo "$file" | grep -E ".mp4$") 
 	if [ "$filetype" != "" ]
 	then
-		ffmpeg -i "$file" "$song"".mp3"
+		#ffmpeg -i "$file" "$song"".mp3"
+		echo ""
 	fi
 	file=$target
 
 	# Adding artist information.
-	presentartist=$(id3v2 -v "$file")
+	presentartist=$(id3v2 -l "$file" | grep -E "Artist\:.+$" -o | sed 's/Artist: //g')
 
 	if [ "$presentartist" == "" ]
 	then
 		echo "No present artist. Should we add the above mentioned?"
 		read yorno
+		# in place of this, show batches of 5 files to verify to allow a faster workflow
 		if [ $yorno == "y" ]
 		then
 			id3v2 -a "$artist" -t "$song" "$file"
