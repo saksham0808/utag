@@ -71,6 +71,7 @@ do
 	# Removing file extension
 	song=$(echo $song		| sed 's/ *\.mp4//gI')
 	song=$(echo $song		| sed 's/ *\.mp3//gI')
+	back=$song 				# Backup to be used to finding feauturing artists
 
 	# Converting first character only to Capital
 	song=$(echo $song		| tr '[:upper:]' '[:lower:]' <<< ${song}) 
@@ -81,8 +82,7 @@ do
 	printf 'Song\t:\t%s\n' "$song"
 	
 	# To find featuring artists now
-	song=$(echo $song 		| sed 's/(official.*)//gI')
-	song=$(echo $song 		| sed 's/\[official.*\]//gI')
+	feat=$(echo $back)
 
 	# Converting to mp3
 	target=$song".mp3"
@@ -108,13 +108,17 @@ do
 		fi	
 	elif [ "$presentartist" != "$artist" ]
 	then
-		echo "Conflicting artist information. Choose 1 or 2:"
+		echo "Conflicting artist information."
 		echo "1. " $presentartist
 		echo "2. " $artist
-		read choice	
+		read -p "Choose 1 or 2 (or 3, 4 to edit 1 or 2): " choice
 		if [ $choice == "2" ]
 		then
-			id3v2 -a "$artist $song $file"
+			id3v2 -a "$artist" -t "$song" "$file"
+		elif [ $choice == "3" ]
+		then
+			read -e -p "Edit original data: " -i "$presentartist" toset
+			id3v2 -a "$toset" -t "$song" "$file"
 		fi
 	fi
 
