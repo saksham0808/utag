@@ -71,7 +71,6 @@ do
 	# Removing file extension
 	song=$(echo $song		| sed 's/ *\.mp4//gI')
 	song=$(echo $song		| sed 's/ *\.mp3//gI')
-	back=$song 				# Backup to be used to finding feauturing artists
 
 	# Converting first character only to Capital
 	song=$(echo $song		| tr '[:upper:]' '[:lower:]' <<< ${song}) 
@@ -82,7 +81,19 @@ do
 	printf 'Song\t:\t%s\n' "$song"
 	
 	# To find featuring artists now
-	feat=$(echo $back)
+	song=$(echo $posthyphen)
+	song=$(echo $song 		| sed 's/(official.*)//gI')
+	song=$(echo $song 		| sed 's/\[official.*\]//gI')
+	song=$(echo $song		| sed 's/ *\.mp4//gI')
+	song=$(echo $song		| sed 's/ *\.mp3//gI')
+	feat=$(echo $song 		| sed 's/ft\. /##/gI' 	| sed 's/feat\. /##/gI')
+	feat=$(echo $feat 		| grep -E "\#\#.+$" -o | sed 's/##//g')
+	feat=$(echo $feat 		| tr '[:upper:]' '[:lower:]' <<< ${feat}) 
+	_capwords $feat
+	feat=$_CAPWORDS
+	printf 'Feat\t:\t%s\n' "$feat"
+
+	continue
 
 	# Converting to mp3
 	target=$song".mp3"
