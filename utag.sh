@@ -49,6 +49,10 @@ do
 	printf '******************************\n'
 	printf 'File\t:\t%s\n' "$file"
 
+	corefilename=$(echo $file | sed 's/.*\///g')
+	printf 'Core\t:\t%s\n' "$corefilename"
+	file=$corefilename
+
 	artist=$(echo $file | grep -E "^.*\ -\ " -o | sed 's/ - $//g')
 
 	# Converting first character only to Capital
@@ -81,12 +85,14 @@ do
 	printf 'Song\t:\t%s\n' "$song"
 	
 	# To find featuring artists now
-	song=$(echo $posthyphen)
-	song=$(echo $song 		| sed 's/(official.*)//gI')
-	song=$(echo $song 		| sed 's/\[official.*\]//gI')
-	song=$(echo $song		| sed 's/ *\.mp4//gI')
-	song=$(echo $song		| sed 's/ *\.mp3//gI')
-	feat=$(echo $song 		| sed 's/ft\. /##/gI' 	| sed 's/feat\. /##/gI')
+	# TODO make the dot after 'feat'/'ft' optional while removing
+	feat=$(echo $posthyphen)
+	feat=$(echo $feat 		| sed  's/(official.*)//gI 	 ; 
+									s/\[official.*\]//gI ;
+									s/ *\.mp4//gI 		 ;
+									s/ *\.mp3//gI 		 ;
+									s/ft\. /##/gI 		 ;
+									s/feat\. /##/gI     ') 
 	feat=$(echo $feat 		| grep -E "\#\#.+$" -o | sed 's/##//g')
 	feat=$(echo $feat 		| tr '[:upper:]' '[:lower:]' <<< ${feat}) 
 	_capwords $feat
