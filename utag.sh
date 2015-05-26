@@ -38,18 +38,26 @@ _capwords()
   done
 }
 
+# TODO check if done file exists
+donefile=$(cat done)
+
 for file in "$@"
 do
+	corefilename=$(echo $file | sed 's/.*\///g')
+	#path=$(echo $file | sed 's/\/[!\/]*$//g')
+	#echo $path
+
+	# Only to do operation on mp3/mp4 files
 	ismpf=$(echo $file | grep -E "\.mp.$" -o)
 	if [ "$ismpf" == "" ]
 	then
 		continue
 	fi
 
+
 	printf '******************************\n'
 	printf 'File\t:\t%s\n' "$file"
 
-	corefilename=$(echo $file | sed 's/.*\///g')
 	printf 'Core\t:\t%s\n' "$corefilename"
 	file=$corefilename
 
@@ -69,8 +77,8 @@ do
 	song=$(echo $posthyphen | sed 's/ft\..*//gI' | sed 's/feat\..*//gI')
 
 	# Removing the "official music video" text
-	song=$(echo $song 		| sed 's/(official.*)//gI')
-	song=$(echo $song 		| sed 's/\[official.*\]//gI')
+	song=$(echo $song 		| sed 's/(official.*)//gI 	;
+	                               s/\[official.*\]//gI')
 
 	# Removing file extension
 	song=$(echo $song		| sed 's/ *\.mp4//gI')
@@ -99,14 +107,19 @@ do
 	feat=$_CAPWORDS
 	printf 'Feat\t:\t%s\n' "$feat"
 
-	continue
+	# Checking whether file has already been converted.
+	hasitbeendone=$(ls | grep '$song.mp3')
+	if [ "$hasitbeendone" != "" ]
+	then
+		continue
+	fi
 
 	# Converting to mp3
 	target=$song".mp3"
 	filetype=$(echo "$file" | grep -E ".mp4$") 
 	if [ "$filetype" != "" ]
 	then
-		#ffmpeg -i "$file" "$song"".mp3"
+		ffmpeg -i "$file" "$song"".mp3"
 		echo ""
 	fi
 	file=$target
