@@ -127,30 +127,12 @@ do
 	# Adding artist information.
 	presentartist=$(id3v2 -l "$file" | grep -E "Artist\:.+$" -o | sed 's/Artist: //g')
 
-	if [ "$presentartist" == "" ]
-	then
-		echo "No present artist. Should we add the above mentioned?"
-		read yorno
-		# in place of this, show batches of 5 files to verify to allow a faster workflow
-		if [ $yorno == "y" ]
-		then
-			id3v2 -a "$artist" -t "$song" "$file"
-		fi	
-	elif [ "$presentartist" != "$artist" ]
-	then
-		echo "Conflicting artist information."
-		echo "1. " $presentartist
-		echo "2. " $artist
-		read -p "Choose 1 or 2 (or 3, 4 to edit 1 or 2): " choice
-		if [ $choice == "2" ]
-		then
-			id3v2 -a "$artist" -t "$song" "$file"
-		elif [ $choice == "3" ]
-		then
-			read -e -p "Edit original data: " -i "$presentartist" toset
-			id3v2 -a "$toset" -t "$song" "$file"
-		fi
-	fi
+	read -e -p "Edit original artist: " -i "$artist" toset
+	read -e -p "Edit original title:" -i "$song" toSong
+	read -e -p "Edit file name:" -i "${song}.mp3" newFile
+	id3v2 -a "$toset" -t "$toSong" "$file"
+	mkdir outs/"$toset"
+	mv "$file" outs/"$toset"/"$newFile"
 
 done
 
